@@ -84,49 +84,6 @@ class ExcelHandler(saxutils.XMLGenerator):
         elif name=="Table":
             self.tables.append(self.rows)
 
-def parse_6sigma_xml_old(cabs_filepath,servers_filepath,cab_cols_filter,server_cols_filter):
-    '''
-    wrapper over xml.sax
-    returns [cabs,servers] - each is a list of dicts
-    '''
-    import functools
-
-    cabsHandler=ExcelHandler()
-    serversHandler=ExcelHandler()
-
-    parse(cabs_filepath, cabsHandler)
-    print()
-    parse(servers_filepath, serversHandler)
-    print()
-
-    cabs_header = cabsHandler.tables[0].pop(0)
-    servers_header = serversHandler.tables[0].pop(0)
-
-    # clean-up header names parsed from xml
-    repls = (('\n', ''), (' ', ''))
-    for no, item in enumerate(cabs_header):
-        cabs_header[no] = functools.reduce(lambda a, kv: a.replace(*kv), repls,cabs_header[no])
-
-    for no, item in enumerate(servers_header):
-        servers_header[no] = functools.reduce(lambda a, kv: a.replace(*kv), repls,servers_header[no])
-
-    # print(cabs_header)
-    # print(servers_header)
-
-    # get column index number of each relevant/needed column (out of all columns available)
-    for key, value in cab_cols_filter.items():
-        cab_cols_filter[key] = cabs_header.index(value)+1
-        # cab_cols_filter[key] = 1+1
-
-    for key, value in server_cols_filter.items():
-        server_cols_filter[key] = servers_header.index(value)
-
-    # get only relevant values from all rows available in xml and assign their column names via dict
-    cabs = extract_values(cabsHandler.tables[0],cab_cols_filter)
-    servers = extract_values(serversHandler.tables[0],server_cols_filter)
-
-    return [cabs,servers]
-
 def parse_6sigma_xml(server_filepath,relevant_server_cols):
     '''
     wrapper over xml.sax
